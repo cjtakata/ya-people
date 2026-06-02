@@ -32,14 +32,14 @@ function cookieStr(name, value, options = {}) {
 export async function createSessionCookie(payload) {
   const token = await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
-    .setExpirationTime('7d')
+    .setExpirationTime('30d')
     .sign(secret())
   const secure = process.env.VERCEL_ENV === 'production'
   return cookieStr(COOKIE, token, {
     // Lax (not Strict) so the session survives being opened from a
     // bookmark, text link, or home-screen icon on mobile — Strict
     // drops the cookie on top-level navigations from external contexts.
-    httpOnly: true, secure, sameSite: 'Lax', maxAge: 7 * 24 * 3600,
+    httpOnly: true, secure, sameSite: 'Lax', maxAge: 30 * 24 * 3600,
   })
 }
 
