@@ -4,6 +4,9 @@ export default function PersonRow({ person: p, selected, onClick }) {
   const initials = p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
   const lm = LIST_META[p.list] || { crew: p.list, badgeCls: '' }
 
+  const g = (p.gender || '').trim().toLowerCase()
+  const genderTag = g === 'male' ? 'M' : g === 'female' ? 'F' : null
+
   return (
     <div className={`person-row${selected ? ' selected' : ''}`} onClick={onClick}>
       <div className="avatar" style={{ background: p.color }}>
@@ -13,6 +16,7 @@ export default function PersonRow({ person: p, selected, onClick }) {
         <div className="person-name">{p.name}</div>
         <div className="person-chips">
           <span className={`badge ${lm.badgeCls}`}>{lm.crew}</span>
+          {genderTag && <span className="badge badge-gender">{genderTag}</span>}
         </div>
       </div>
       <div className="person-meta-right">

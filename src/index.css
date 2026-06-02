@@ -260,6 +260,7 @@ body {
 .badge-early     { background: var(--earlycareer-bg); color: var(--earlycareer); }
 .badge-youngpro  { background: var(--youngpro-bg);   color: var(--youngpro); }
 .badge-crew      { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.badge-gender    { background: var(--bg); color: var(--muted); border: 1px solid var(--border); padding: 2px 6px; }
 .badge-active    { background: #d1fae5; color: #059669; }
 .badge-inactive  { background: #fee2e2; color: #dc2626; }
 
