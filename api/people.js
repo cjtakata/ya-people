@@ -1,5 +1,5 @@
 import { requireAuth } from './_lib/auth.js'
-import { pcoFetchAll, getFieldDefinitions, resolveFieldId, avatarColor, calcAge, fmtSince } from './_lib/pco.js'
+import { pcoFetchAll, getFieldDefinitions, avatarColor, calcAge, fmtSince } from './_lib/pco.js'
 
 const LISTS = [
   { id: () => process.env.PCO_LIST_COLLEGE,      key: 'college',     name: 'College Life' },
@@ -8,29 +8,31 @@ const LISTS = [
 ]
 
 function extractFieldValues(personId, included, fieldDefs) {
-  const defIdToEnv = {
-    [fieldDefs[process.env.PCO_FIELD_ACTIVE]]:      'active',
-    [fieldDefs[process.env.PCO_FIELD_FOLLOWUP]]:    'followup',
-    [fieldDefs[process.env.PCO_FIELD_CREW]]:        'crew',
-    [fieldDefs[process.env.PCO_FIELD_SMALL_GROUP]]: 'inGroup',
-    [fieldDefs[process.env.PCO_FIELD_NOTES]]:       'notes',
-  }
+  const crewDefId        = fieldDefs[process.env.PCO_FIELD_CREW]
+  const needsFollowupId  = fieldDefs[process.env.PCO_FIELD_NEEDS_FOLLOWUP]
+  const notesDefId       = fieldDefs[process.env.PCO_FIELD_NOTES]
 
-  const values   = {}
-  const dataIds  = {}
+  const defIdToKey = {}
+  if (crewDefId)       defIdToKey[crewDefId]       = 'crew'
+  if (needsFollowupId) defIdToKey[needsFollowupId] = 'needsFollowup'
+  if (notesDefId)      defIdToKey[notesDefId]       = 'notes'
+
+  const values  = {}
+  const dataIds = {}
 
   for (const item of included) {
     if (item.type !== 'FieldDatum') continue
     if (item.relationships?.customizable?.data?.id !== personId) continue
 
     const defId = item.relationships?.field_definition?.data?.id
-    const key   = defIdToEnv[defId]
+    const key   = defIdToKey[defId]
     if (!key) continue
 
-    dataIds[key]  = item.id
-    const raw     = item.attributes.value
-    if (key === 'active' || key === 'inGroup') {
-      values[key] = raw === 'true' || raw === true
+    dataIds[key] = item.id
+    const raw    = item.attributes.value
+
+    if (key === 'needsFollowup') {
+      values[key] = raw === 'true' || raw === true || raw === 'Yes' || raw === 'yes'
     } else {
       values[key] = raw || ''
     }
@@ -60,23 +62,19 @@ function normalizePerson(raw, included, list, fieldDefs) {
   return {
     id,
     name,
-    email:    a.primary_email_address || '',
-    phone:    extractPhone(id, included),
-    age:      calcAge(a.birthdate),
-    gender:   a.gender || null,
-    since:    fmtSince(a.created_at),
-    avatar:   a.avatar || null,
-    color:    avatarColor(name),
-    list:     list.key,
-    listName: list.name,
-    // YA custom fields
-    active:   values.active   ?? false,
-    inGroup:  values.inGroup  ?? false,
-    crew:     values.crew     || '',
-    followup: values.followup || '',
-    notes:    values.notes    || '',
-    // internal: field_data record IDs for PATCH
-    _fieldDataIds: dataIds,
+    email:          a.primary_email_address || '',
+    phone:          extractPhone(id, included),
+    age:            calcAge(a.birthdate),
+    gender:         a.gender || null,
+    since:          fmtSince(a.created_at),
+    avatar:         a.avatar || null,
+    color:          avatarColor(name),
+    list:           list.key,
+    listName:       list.name,
+    crew:           values.crew         || '',
+    needsFollowup:  values.needsFollowup ?? false,
+    notes:          values.notes        || '',
+    _fieldDataIds:  dataIds,
   }
 }
 
@@ -95,7 +93,6 @@ export default async function handler(req, res) {
       )
     )
 
-    // Deduplicate by person ID (someone could be in multiple lists — keep first occurrence)
     const seen   = new Set()
     const people = []
 
@@ -110,6 +107,10 @@ export default async function handler(req, res) {
     res.json(people)
   } catch (err) {
     console.error('people.js error:', err)
-    res.status(500).json({ error: 'Failed to fetch people from PCO' })
+    const isDev = process.env.VERCEL_ENV !== 'production'
+    res.status(500).json({
+      error: 'Failed to fetch people from PCO',
+      ...(isDev && { detail: err.message }),
+    })
   }
 }

@@ -2,17 +2,11 @@ import { useState, useMemo } from 'react'
 import PersonRow from './PersonRow.jsx'
 
 const TABS = [
-  { key: 'all',        label: 'All',         cls: 'tab-all' },
-  { key: 'college',    label: 'College Life', cls: 'tab-college' },
-  { key: 'earlycareer',label: 'Early Career', cls: 'tab-early' },
-  { key: 'youngpro',   label: 'Young Pro',    cls: 'tab-youngpro' },
+  { key: 'all',         label: 'All',          cls: 'tab-all' },
+  { key: 'college',     label: 'College Life',  cls: 'tab-college' },
+  { key: 'earlycareer', label: 'Early Career',  cls: 'tab-early' },
+  { key: 'youngpro',    label: 'Young Pro',     cls: 'tab-youngpro' },
 ]
-
-function fmtDate(ds) {
-  if (!ds) return ''
-  const d = new Date(ds + 'T00:00:00')
-  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-}
 
 export default function PeopleList({ people, loading, error, selectedId, onSelect }) {
   const [tab, setTab]       = useState('all')
@@ -32,16 +26,10 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
       if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
       return true
     })
-    if (sort === 'name')     list = [...list].sort((a, b) => a.name.localeCompare(b.name))
+    if (sort === 'name')    list = [...list].sort((a, b) => a.name.localeCompare(b.name))
     if (sort === 'followup') list = [...list].sort((a, b) => {
-      if (!a.followup && !b.followup) return 0
-      if (!a.followup) return -1
-      if (!b.followup) return 1
-      return a.followup.localeCompare(b.followup)
-    })
-    if (sort === 'inactive')  list = [...list].sort((a, b) => {
-      if (a.active === b.active) return 0
-      return a.active ? 1 : -1
+      if (a.needsFollowup === b.needsFollowup) return a.name.localeCompare(b.name)
+      return a.needsFollowup ? -1 : 1
     })
     return list
   }, [people, tab, search, sort])
@@ -76,8 +64,7 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
         <span><strong>{visible.length}</strong> people</span>
         <select className="sort-select" value={sort} onChange={e => setSort(e.target.value)}>
           <option value="name">Sort: Name</option>
-          <option value="followup">Sort: Needs follow-up</option>
-          <option value="inactive">Sort: Inactive first</option>
+          <option value="followup">Sort: Needs follow-up first</option>
         </select>
       </div>
 

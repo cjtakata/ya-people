@@ -6,12 +6,7 @@ const LIST_META = {
   youngpro:    { label: 'Young Pro',    badgeCls: 'badge-youngpro' },
 }
 
-const CREW_OPTIONS = [
-  '',
-  'College Life',
-  'Early Career',
-  'Young Professionals',
-]
+const CREW_OPTIONS = ['College Life', 'Early Career', 'Young Professionals']
 
 export default function DetailPanel({ person, onClose, onSave }) {
   const [draft, setDraft]     = useState(null)
@@ -22,11 +17,9 @@ export default function DetailPanel({ person, onClose, onSave }) {
   useEffect(() => {
     if (!person) return
     setDraft({
-      active:   person.active,
-      inGroup:  person.inGroup,
-      crew:     person.crew || '',
-      followup: person.followup || '',
-      notes:    person.notes || '',
+      crew:          person.crew          || '',
+      needsFollowup: person.needsFollowup ?? false,
+      notes:         person.notes         || '',
     })
     setUnsaved(false)
     setSaved(false)
@@ -122,32 +115,21 @@ export default function DetailPanel({ person, onClose, onSave }) {
           </div>
         </div>
 
-        {/* YA custom fields */}
+        {/* YA Details custom fields */}
         <div>
           <div className="field-section-title">
-            YA Custom Fields
+            YA Details
             <span className={`unsaved-dot${unsaved ? ' show' : ''}`} />
           </div>
 
           <div className="field-row">
             <div>
-              <div className="field-label">Active in YA</div>
-              <div className="field-sub">Regularly attending and engaged</div>
+              <div className="field-label">Needs Follow-Up?</div>
+              <div className="field-sub">Flag this person for a follow-up conversation</div>
             </div>
             <button
-              className={`toggle ${draft.active ? 'on' : 'off'}`}
-              onClick={() => update('active', !draft.active)}
-            />
-          </div>
-
-          <div className="field-row">
-            <div>
-              <div className="field-label">In Small Group</div>
-              <div className="field-sub">Connected to a crew or small group</div>
-            </div>
-            <button
-              className={`toggle ${draft.inGroup ? 'on' : 'off'}`}
-              onClick={() => update('inGroup', !draft.inGroup)}
+              className={`toggle ${draft.needsFollowup ? 'on' : 'off'}`}
+              onClick={() => update('needsFollowup', !draft.needsFollowup)}
             />
           </div>
 
@@ -160,31 +142,19 @@ export default function DetailPanel({ person, onClose, onSave }) {
                 onChange={e => update('crew', e.target.value)}
               >
                 <option value="">— Not assigned —</option>
-                {CREW_OPTIONS.filter(Boolean).map(c => (
+                {CREW_OPTIONS.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
             </div>
           </div>
 
-          <div className="field-stack-wrap">
-            <div className="field-stack">
-              <div className="field-label">Last Followed Up</div>
-              <input
-                type="date"
-                className="field-date"
-                value={draft.followup}
-                onChange={e => update('followup', e.target.value)}
-              />
-            </div>
-          </div>
-
           <div className="field-stack-wrap" style={{ borderBottom: 'none' }}>
             <div className="field-stack">
-              <div className="field-label">Leader Notes</div>
+              <div className="field-label">YA Notes</div>
               <textarea
                 className="field-textarea"
-                placeholder="Private notes visible only to leaders…"
+                placeholder="Notes visible to all leaders…"
                 value={draft.notes}
                 onChange={e => update('notes', e.target.value)}
               />

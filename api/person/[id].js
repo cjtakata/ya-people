@@ -2,11 +2,9 @@ import { requireAuth } from '../_lib/auth.js'
 import { pcoFetch, getFieldDefinitions } from '../_lib/pco.js'
 
 const FIELD_ENV_MAP = {
-  active:  'PCO_FIELD_ACTIVE',
-  followup: 'PCO_FIELD_FOLLOWUP',
-  crew:    'PCO_FIELD_CREW',
-  inGroup: 'PCO_FIELD_SMALL_GROUP',
-  notes:   'PCO_FIELD_NOTES',
+  crew:          'PCO_FIELD_CREW',
+  needsFollowup: 'PCO_FIELD_NEEDS_FOLLOWUP',
+  notes:         'PCO_FIELD_NOTES',
 }
 
 export default async function handler(req, res) {
@@ -21,8 +19,6 @@ export default async function handler(req, res) {
 
   try {
     const { fields, fieldDataIds } = req.body
-    // fields: { active, inGroup, crew, followup, notes }
-    // fieldDataIds: { active: "123", ... } — existing field_data record IDs
 
     if (!fields || typeof fields !== 'object') {
       return res.status(400).json({ error: 'Missing fields' })
@@ -32,26 +28,28 @@ export default async function handler(req, res) {
 
     const updates = await Promise.all(
       Object.entries(fields).map(async ([key, value]) => {
-        const envKey   = FIELD_ENV_MAP[key]
+        const envKey = FIELD_ENV_MAP[key]
         if (!envKey) return null
 
         const fieldName = process.env[envKey]
         if (!fieldName) return null
 
-        const defId      = fieldDefs[fieldName]
+        const defId = fieldDefs[fieldName]
         if (!defId) {
-          console.warn(`Field definition not found for: ${fieldName}`)
+          console.warn(`Field definition not found in PCO for: "${fieldName}"`)
           return null
         }
 
-        const rawValue = (key === 'active' || key === 'inGroup')
-          ? String(!!value)
-          : (value || '')
+        let rawValue
+        if (key === 'needsFollowup') {
+          rawValue = String(!!value)
+        } else {
+          rawValue = value || ''
+        }
 
         const existingId = fieldDataIds?.[key]
 
         if (existingId) {
-          // Update existing field_data record
           await pcoFetch(`/people/v2/people/${id}/field_data/${existingId}`, {
             method: 'PATCH',
             body: JSON.stringify({
@@ -64,7 +62,6 @@ export default async function handler(req, res) {
           })
           return [key, { value, dataId: existingId }]
         } else {
-          // Create new field_data record
           const created = await pcoFetch(`/people/v2/people/${id}/field_data`, {
             method: 'POST',
             body: JSON.stringify({
@@ -82,20 +79,19 @@ export default async function handler(req, res) {
       })
     )
 
-    // Build the updated fields object to return
-    const updated = { id }
+    const updated        = { id }
     const updatedDataIds = { ...fieldDataIds }
     for (const result of updates) {
       if (!result) continue
       const [key, { value, dataId }] = result
-      updated[key] = value
-      updatedDataIds[key] = dataId
+      updated[key]         = value
+      updatedDataIds[key]  = dataId
     }
     updated._fieldDataIds = updatedDataIds
 
     res.json(updated)
   } catch (err) {
     console.error(`person/${id} PATCH error:`, err)
-    res.status(500).json({ error: 'Failed to save to PCO' })
+    res.status(500).json({ error: 'Failed to save to PCO', detail: err.message })
   }
 }
