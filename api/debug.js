@@ -44,14 +44,12 @@ export default async function handler(req, res) {
   try {
     const { data } = await pcoFetchAll('/people/v2/lists?per_page=100')
     results.totalListsVisible = data.length
-    results.matchingLists = data
-      .filter(l => /college|early|young|ya\b|young adult/i.test(l.attributes?.name || ''))
-      .map(l => ({
-        id:     l.id,
-        name:   l.attributes?.name,
-        total:  l.attributes?.total_people,
-        status: l.attributes?.status,
-      }))
+    results.allVisibleLists = data.map(l => ({
+      id:     l.id,
+      name:   l.attributes?.name,
+      total:  l.attributes?.total_people,
+      status: l.attributes?.status,
+    }))
   } catch (e) {
     results.listsError = e.message
   }
