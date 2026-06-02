@@ -441,6 +441,15 @@ body {
 
   .logout-btn    { display: none; }
   .app-subtitle  { display: none; }
+
+  /* iOS Safari auto-zooms when focusing a form field with text < 16px and
+     doesn't zoom back out. Keep form text at 16px on mobile to prevent it. */
+  .search-input,
+  .filter-select,
+  .sort-select,
+  .field-select,
+  .field-date,
+  .field-textarea { font-size: 16px; }
 }
 
 ::-webkit-scrollbar { width: 5px; }
