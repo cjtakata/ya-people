@@ -101,7 +101,11 @@ export default async function handler(req, res) {
       const existingId = fieldDataIds?.[key]
 
       if (existingId) {
-        await pcoFetch(`/people/v2/people/${id}/field_data/${existingId}`, {
+        // Update via the TOP-LEVEL field_data endpoint. The nested
+        // /people/{id}/field_data/{id} PATCH mishandles select fields and
+        // 422s with a spurious "field datum already exists" error; the
+        // top-level endpoint updates the value cleanly for all field types.
+        await pcoFetch(`/people/v2/field_data/${existingId}`, {
           method: 'PATCH',
           body: JSON.stringify({
             data: { type: 'FieldDatum', id: existingId, attributes: { value: rawValue } },
