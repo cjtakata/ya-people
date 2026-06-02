@@ -142,6 +142,17 @@ export default function DetailPanel({ person, crewOptions = [], statusOptions = 
             <span className={`unsaved-dot${unsaved ? ' show' : ''}`} />
           </div>
 
+          <div className="field-row">
+            <div>
+              <div className="field-label">Needs Follow-Up?</div>
+              <div className="field-sub">Flag this person for a follow-up conversation</div>
+            </div>
+            <button
+              className={`toggle ${draft.needsFollowup ? 'on' : 'off'}`}
+              onClick={() => update('needsFollowup', !draft.needsFollowup)}
+            />
+          </div>
+
           <div className="field-stack-wrap">
             <div className="field-stack">
               <div className="field-label">YA Status</div>
@@ -156,17 +167,6 @@ export default function DetailPanel({ person, crewOptions = [], statusOptions = 
                 ))}
               </select>
             </div>
-          </div>
-
-          <div className="field-row">
-            <div>
-              <div className="field-label">Needs Follow-Up?</div>
-              <div className="field-sub">Flag this person for a follow-up conversation</div>
-            </div>
-            <button
-              className={`toggle ${draft.needsFollowup ? 'on' : 'off'}`}
-              onClick={() => update('needsFollowup', !draft.needsFollowup)}
-            />
           </div>
 
           <div className="field-stack-wrap">
