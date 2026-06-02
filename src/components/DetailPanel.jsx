@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { LIST_META } from './listMeta.js'
 
-const CREW_FALLBACK = ['College Life', 'Early Career', 'Young Professionals']
+const CREW_FALLBACK   = ['College Life', 'Early Career', 'Young Professionals']
+const STATUS_FALLBACK = ['Active', 'Missing', 'Friend', 'Alumni', 'Moved On']
 
-export default function DetailPanel({ person, crewOptions = [], onClose, onSave }) {
-  const crewChoices = crewOptions.length ? crewOptions : CREW_FALLBACK
+export default function DetailPanel({ person, crewOptions = [], statusOptions = [], onClose, onSave }) {
+  const crewChoices   = crewOptions.length   ? crewOptions   : CREW_FALLBACK
+  const statusChoices = statusOptions.length ? statusOptions : STATUS_FALLBACK
   const [draft, setDraft]     = useState(null)
   const [unsaved, setUnsaved] = useState(false)
   const [saving, setSaving]   = useState(false)
@@ -13,6 +15,7 @@ export default function DetailPanel({ person, crewOptions = [], onClose, onSave 
   useEffect(() => {
     if (!person) return
     setDraft({
+      status:        person.status        || '',
       crew:          person.crew          || '',
       needsFollowup: person.needsFollowup ?? false,
       notes:         person.notes         || '',
@@ -44,12 +47,13 @@ export default function DetailPanel({ person, crewOptions = [], onClose, onSave 
     // Diff against the loaded values — only send fields that actually changed,
     // so we never re-write (or clobber) a field the leader didn't touch.
     const original = {
+      status:        person.status        || '',
       crew:          person.crew          || '',
       needsFollowup: person.needsFollowup ?? false,
       notes:         person.notes         || '',
     }
     const changed = {}
-    for (const k of ['crew', 'needsFollowup', 'notes']) {
+    for (const k of ['status', 'crew', 'needsFollowup', 'notes']) {
       if (draft[k] !== original[k]) changed[k] = draft[k]
     }
 
@@ -136,6 +140,22 @@ export default function DetailPanel({ person, crewOptions = [], onClose, onSave 
           <div className="field-section-title">
             YA Details
             <span className={`unsaved-dot${unsaved ? ' show' : ''}`} />
+          </div>
+
+          <div className="field-stack-wrap">
+            <div className="field-stack">
+              <div className="field-label">YA Status</div>
+              <select
+                className="field-select"
+                value={draft.status}
+                onChange={e => update('status', e.target.value)}
+              >
+                <option value="">— Not set —</option>
+                {statusChoices.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="field-row">

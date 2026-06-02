@@ -1,4 +1,5 @@
 import { LIST_META } from './listMeta.js'
+import { statusClass } from './statusMeta.js'
 
 export default function PersonRow({ person: p, selected, onClick }) {
   const initials = p.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
@@ -15,6 +16,7 @@ export default function PersonRow({ person: p, selected, onClick }) {
       <div className="person-info">
         <div className="person-name">{p.name}</div>
         <div className="person-chips">
+          {p.status && <span className={`badge ${statusClass(p.status)}`}>{p.status}</span>}
           <span className={`badge ${lm.badgeCls}`}>{lm.crew}</span>
           {genderTag && <span className="badge badge-gender">{genderTag}</span>}
         </div>

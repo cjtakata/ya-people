@@ -26,7 +26,8 @@ function AuthenticatedApp({ user, onLogout }) {
   const [loading, setLoading]         = useState(true)
   const [error, setError]             = useState(null)
   const [selectedId, setSelectedId]   = useState(null)
-  const [crewOptions, setCrewOptions] = useState([])
+  const [crewOptions, setCrewOptions]     = useState([])
+  const [statusOptions, setStatusOptions] = useState([])
 
   useEffect(() => {
     fetch('/api/people')
@@ -36,7 +37,10 @@ function AuthenticatedApp({ user, onLogout }) {
 
     fetch('/api/meta')
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data?.crewOptions) setCrewOptions(data.crewOptions) })
+      .then(data => {
+        if (data?.crewOptions)   setCrewOptions(data.crewOptions)
+        if (data?.statusOptions) setStatusOptions(data.statusOptions)
+      })
       .catch(() => {})
   }, [])
 
@@ -71,12 +75,14 @@ function AuthenticatedApp({ user, onLogout }) {
           people={people}
           loading={loading}
           error={error}
+          statusOptions={statusOptions}
           selectedId={selectedId}
           onSelect={setSelectedId}
         />
         <DetailPanel
           person={selectedPerson}
           crewOptions={crewOptions}
+          statusOptions={statusOptions}
           onClose={() => setSelectedId(null)}
           onSave={handleSave}
         />

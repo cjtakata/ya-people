@@ -261,6 +261,13 @@ body {
 .badge-youngpro  { background: var(--youngpro-bg);   color: var(--youngpro); }
 .badge-crew      { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
 .badge-gender    { background: var(--bg); color: var(--muted); border: 1px solid var(--border); padding: 2px 6px; }
+
+/* YA Status tags */
+.badge-status-active   { background: #d1fae5; color: #059669; }
+.badge-status-missing  { background: #fef3c7; color: #b45309; }
+.badge-status-friend   { background: #e0f2fe; color: #0284c7; }
+.badge-status-alumni   { background: #ede9fe; color: #7c3aed; }
+.badge-status-movedon  { background: #f3f4f6; color: #6b7280; }
 .badge-active    { background: #d1fae5; color: #059669; }
 .badge-inactive  { background: #fee2e2; color: #dc2626; }
 

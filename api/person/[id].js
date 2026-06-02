@@ -6,6 +6,7 @@ const FIELD_ENV_MAP = {
   crew:          'PCO_FIELD_CREW',
   needsFollowup: 'PCO_FIELD_NEEDS_FOLLOWUP',
   notes:         'PCO_FIELD_NOTES',
+  status:        'PCO_FIELD_STATUS',
 }
 
 // Hardcoded allowlist: the PCO field-definition ID each writable key resolves
@@ -15,7 +16,11 @@ const EXPECTED_FIELD_IDS = {
   crew:          '431524',
   needsFollowup: '1065427',
   notes:         '1065428',
+  status:        '1065431',
 }
+
+// Select-type fields whose submitted value must match a live PCO option.
+const SELECT_FIELDS = { crew: '431524', status: '1065431' }
 
 const NOTES_MAX = 5000
 
@@ -48,17 +53,18 @@ export default async function handler(req, res) {
     const fieldDefs = await getFieldDefinitions()
 
     // ── Value validation ──────────────────────────────────────────
-    if (keys.includes('crew')) {
-      const crew = fields.crew
-      if (typeof crew !== 'string') {
-        return res.status(422).json({ error: 'Invalid crew', detail: 'Crew must be text.' })
+    for (const key of keys) {
+      if (!(key in SELECT_FIELDS)) continue
+      const val = fields[key]
+      if (typeof val !== 'string') {
+        return res.status(422).json({ error: `Invalid ${key}`, detail: `${key} must be text.` })
       }
-      if (crew !== '') {
-        const options = await getFieldOptions(EXPECTED_FIELD_IDS.crew)
-        if (!options.includes(crew)) {
+      if (val !== '') {
+        const options = await getFieldOptions(SELECT_FIELDS[key])
+        if (!options.includes(val)) {
           return res.status(422).json({
-            error: 'Invalid crew',
-            detail: `Crew must be one of: ${options.join(', ')} (or empty).`,
+            error: `Invalid ${key}`,
+            detail: `${key} must be one of: ${options.join(', ')} (or empty).`,
           })
         }
       }

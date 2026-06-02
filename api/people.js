@@ -11,11 +11,13 @@ function extractFieldValues(personId, included, fieldDefs) {
   const crewDefId        = fieldDefs[process.env.PCO_FIELD_CREW]
   const needsFollowupId  = fieldDefs[process.env.PCO_FIELD_NEEDS_FOLLOWUP]
   const notesDefId       = fieldDefs[process.env.PCO_FIELD_NOTES]
+  const statusDefId      = fieldDefs[process.env.PCO_FIELD_STATUS]
 
   const defIdToKey = {}
   if (crewDefId)       defIdToKey[crewDefId]       = 'crew'
   if (needsFollowupId) defIdToKey[needsFollowupId] = 'needsFollowup'
   if (notesDefId)      defIdToKey[notesDefId]       = 'notes'
+  if (statusDefId)     defIdToKey[statusDefId]      = 'status'
 
   const values  = {}
   const dataIds = {}
@@ -74,6 +76,7 @@ function normalizePerson(raw, included, list, fieldDefs) {
     crew:           values.crew         || '',
     needsFollowup:  values.needsFollowup ?? false,
     notes:          values.notes        || '',
+    status:         values.status       || '',
     _fieldDataIds:  dataIds,
   }
 }

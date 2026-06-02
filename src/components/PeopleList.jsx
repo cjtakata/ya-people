@@ -9,10 +9,11 @@ const LIST_OPTIONS = [
   { key: 'youngpro',    label: 'Young Professionals' },
 ]
 
-export default function PeopleList({ people, loading, error, selectedId, onSelect }) {
+export default function PeopleList({ people, loading, error, statusOptions = [], selectedId, onSelect }) {
   const [list, setList]         = useState('all')
   const [gender, setGender]     = useState('all')
   const [followup, setFollowup] = useState('all')
+  const [status, setStatus]     = useState('all')
   const [search, setSearch]     = useState('')
   const [sort, setSort]         = useState('name')
 
@@ -29,6 +30,7 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
       if (gender !== 'all' && (p.gender || '').toLowerCase() !== gender) return false
       if (followup === 'needs' && !p.needsFollowup) return false
       if (followup === 'none'  &&  p.needsFollowup) return false
+      if (status !== 'all' && p.status !== status) return false
       if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
       return true
     })
@@ -38,7 +40,7 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
       return a.needsFollowup ? -1 : 1
     })
     return rows
-  }, [people, list, gender, followup, search, sort])
+  }, [people, list, gender, followup, status, search, sort])
 
   return (
     <div className="people-pane">
@@ -69,6 +71,14 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
             <option value="needs">Needs follow-up</option>
             <option value="none">No follow-up</option>
           </select>
+          {statusOptions.length > 0 && (
+            <select className="filter-select" value={status} onChange={e => setStatus(e.target.value)}>
+              <option value="all">Any status</option>
+              {statusOptions.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 
