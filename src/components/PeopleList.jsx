@@ -10,10 +10,11 @@ const LIST_OPTIONS = [
 ]
 
 export default function PeopleList({ people, loading, error, selectedId, onSelect }) {
-  const [list, setList]     = useState('all')
-  const [gender, setGender] = useState('all')
-  const [search, setSearch] = useState('')
-  const [sort, setSort]     = useState('name')
+  const [list, setList]         = useState('all')
+  const [gender, setGender]     = useState('all')
+  const [followup, setFollowup] = useState('all')
+  const [search, setSearch]     = useState('')
+  const [sort, setSort]         = useState('name')
 
   const counts = useMemo(() => ({
     all:         people.length,
@@ -26,6 +27,8 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
     let rows = people.filter(p => {
       if (list !== 'all' && p.list !== list) return false
       if (gender !== 'all' && (p.gender || '').toLowerCase() !== gender) return false
+      if (followup === 'needs' && !p.needsFollowup) return false
+      if (followup === 'none'  &&  p.needsFollowup) return false
       if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
       return true
     })
@@ -35,7 +38,7 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
       return a.needsFollowup ? -1 : 1
     })
     return rows
-  }, [people, list, gender, search, sort])
+  }, [people, list, gender, followup, search, sort])
 
   return (
     <div className="people-pane">
@@ -60,6 +63,11 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
             <option value="all">All genders</option>
             <option value="male">Male</option>
             <option value="female">Female</option>
+          </select>
+          <select className="filter-select" value={followup} onChange={e => setFollowup(e.target.value)}>
+            <option value="all">Any follow-up</option>
+            <option value="needs">Needs follow-up</option>
+            <option value="none">No follow-up</option>
           </select>
         </div>
       </div>

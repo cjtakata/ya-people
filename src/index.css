@@ -199,13 +199,14 @@ body {
 .search-input:focus { border-color: var(--primary); background: var(--surface); }
 .search-input::placeholder { color: var(--muted); }
 
-.filter-row { display: flex; gap: 8px; }
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; }
 .filter-select {
-  flex: 1; min-width: 0;
+  flex: 1 1 96px; min-width: 96px;
   border: 1.5px solid var(--border); border-radius: 8px;
   padding: 8px 10px; font-size: 13px; font-family: inherit; font-weight: 500;
   background: var(--bg); color: var(--text); outline: none;
   cursor: pointer; transition: border-color .15s;
+  text-overflow: ellipsis;
 }
 .filter-select:focus { border-color: var(--primary); }
 
