@@ -42,7 +42,11 @@ function AuthenticatedApp({ user, onLogout }) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     })
-    if (!res.ok) throw new Error('Save failed')
+    if (!res.ok) {
+      let detail = ''
+      try { detail = (await res.json()).detail || '' } catch { /* ignore */ }
+      throw new Error(detail || `Save failed (HTTP ${res.status})`)
+    }
     const updated = await res.json()
     setPeople(prev => prev.map(p => p.id === id ? { ...p, ...updated } : p))
     return updated

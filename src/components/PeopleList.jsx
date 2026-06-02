@@ -1,15 +1,17 @@
 import { useState, useMemo } from 'react'
 import PersonRow from './PersonRow.jsx'
+import { LIST_META } from './listMeta.js'
 
-const TABS = [
-  { key: 'all',         label: 'All',          cls: 'tab-all' },
-  { key: 'college',     label: 'College Life',  cls: 'tab-college' },
-  { key: 'earlycareer', label: 'Early Career',  cls: 'tab-early' },
-  { key: 'youngpro',    label: 'Young Pro',     cls: 'tab-youngpro' },
+const LIST_OPTIONS = [
+  { key: 'all',         label: 'All crews' },
+  { key: 'college',     label: 'College Life' },
+  { key: 'earlycareer', label: 'Early Career' },
+  { key: 'youngpro',    label: 'Young Professionals' },
 ]
 
 export default function PeopleList({ people, loading, error, selectedId, onSelect }) {
-  const [tab, setTab]       = useState('all')
+  const [list, setList]     = useState('all')
+  const [gender, setGender] = useState('all')
   const [search, setSearch] = useState('')
   const [sort, setSort]     = useState('name')
 
@@ -21,18 +23,19 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
   }), [people])
 
   const visible = useMemo(() => {
-    let list = people.filter(p => {
-      if (tab !== 'all' && p.list !== tab) return false
+    let rows = people.filter(p => {
+      if (list !== 'all' && p.list !== list) return false
+      if (gender !== 'all' && (p.gender || '').toLowerCase() !== gender) return false
       if (search && !p.name.toLowerCase().includes(search.toLowerCase())) return false
       return true
     })
-    if (sort === 'name')    list = [...list].sort((a, b) => a.name.localeCompare(b.name))
-    if (sort === 'followup') list = [...list].sort((a, b) => {
+    if (sort === 'name')     rows = [...rows].sort((a, b) => a.name.localeCompare(b.name))
+    if (sort === 'followup') rows = [...rows].sort((a, b) => {
       if (a.needsFollowup === b.needsFollowup) return a.name.localeCompare(b.name)
       return a.needsFollowup ? -1 : 1
     })
-    return list
-  }, [people, tab, search, sort])
+    return rows
+  }, [people, list, gender, search, sort])
 
   return (
     <div className="people-pane">
@@ -47,16 +50,17 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
             onChange={e => setSearch(e.target.value)}
           />
         </div>
-        <div className="list-tabs">
-          {TABS.map(t => (
-            <span
-              key={t.key}
-              className={`tab ${t.cls}${tab !== t.key ? ' inactive' : ''}`}
-              onClick={() => setTab(t.key)}
-            >
-              {t.label} <strong>{counts[t.key]}</strong>
-            </span>
-          ))}
+        <div className="filter-row">
+          <select className="filter-select" value={list} onChange={e => setList(e.target.value)}>
+            {LIST_OPTIONS.map(o => (
+              <option key={o.key} value={o.key}>{o.label} ({counts[o.key]})</option>
+            ))}
+          </select>
+          <select className="filter-select" value={gender} onChange={e => setGender(e.target.value)}>
+            <option value="all">All genders</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
         </div>
       </div>
 
@@ -72,7 +76,7 @@ export default function PeopleList({ people, loading, error, selectedId, onSelec
         {loading && <div className="empty-state">Loading people from PCO…</div>}
         {error   && <div className="empty-state" style={{ color: 'var(--danger)' }}>{error}</div>}
         {!loading && !error && visible.length === 0 && (
-          <div className="empty-state">🔍<p>No people match your search.</p></div>
+          <div className="empty-state">🔍<p>No people match your filters.</p></div>
         )}
         {visible.map(p => (
           <PersonRow

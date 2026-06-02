@@ -1,10 +1,5 @@
 import { useState, useEffect } from 'react'
-
-const LIST_META = {
-  college:     { label: 'College Life', badgeCls: 'badge-college' },
-  earlycareer: { label: 'Early Career', badgeCls: 'badge-early' },
-  youngpro:    { label: 'Young Pro',    badgeCls: 'badge-youngpro' },
-}
+import { LIST_META } from './listMeta.js'
 
 const CREW_OPTIONS = ['College Life', 'Early Career', 'Young Professionals']
 
@@ -35,7 +30,7 @@ export default function DetailPanel({ person, onClose, onSave }) {
     )
   }
 
-  const lm       = LIST_META[person.list] || { label: person.list, badgeCls: '' }
+  const lm       = LIST_META[person.list] || { crew: person.list, badgeCls: '' }
   const initials = person.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
 
   function update(field, value) {
@@ -54,8 +49,8 @@ export default function DetailPanel({ person, onClose, onSave }) {
       setUnsaved(false)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
-    } catch {
-      alert('Save failed. Please try again.')
+    } catch (err) {
+      alert(`Couldn't save to PCO:\n\n${err.message}`)
     } finally {
       setSaving(false)
     }
@@ -87,7 +82,7 @@ export default function DetailPanel({ person, onClose, onSave }) {
           >
             ↗ View in PCO
           </a>
-          <span className={`badge ${lm.badgeCls}`}>{lm.label}</span>
+          <span className={`badge ${lm.badgeCls}`}>{lm.crew}</span>
         </div>
       </div>
 

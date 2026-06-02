@@ -1,10 +1,4 @@
-const LOGO = (
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-    <rect width="200" height="200" fill="#0a0a0a"/>
-    <text x="100" y="148" fontFamily="Georgia,'Times New Roman',serif" fontSize="108"
-      fontWeight="bold" fill="#f2ede4" textAnchor="middle" letterSpacing="-2">ya</text>
-  </svg>
-)
+const LOGO = <img src="/ya.svg" alt="YA" />
 
 export default function LoginScreen() {
   const params = new URLSearchParams(window.location.search)
