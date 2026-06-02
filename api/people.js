@@ -85,13 +85,23 @@ export default async function handler(req, res) {
   try {
     const fieldDefs = await getFieldDefinitions()
 
-    const listResults = await Promise.all(
+    const settled = await Promise.allSettled(
       LISTS.map(list =>
         pcoFetchAll(
           `/people/v2/lists/${list.id()}/people?include=phone_numbers,field_data&per_page=100`
         ).then(({ data, included }) => ({ list, data, included }))
       )
     )
+
+    const listResults = settled
+      .filter(r => {
+        if (r.status === 'rejected') {
+          console.error('List fetch failed:', r.reason?.message)
+          return false
+        }
+        return true
+      })
+      .map(r => r.value)
 
     const seen   = new Set()
     const people = []
