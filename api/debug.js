@@ -1,5 +1,5 @@
 import { requireAuth } from './_lib/auth.js'
-import { pcoFetch } from './_lib/pco.js'
+import { pcoFetch, pcoFetchAll } from './_lib/pco.js'
 
 export default async function handler(req, res) {
   const user = await requireAuth(req, res)
@@ -7,49 +7,53 @@ export default async function handler(req, res) {
 
   const results = {}
 
-  try {
-    const defs = await pcoFetch('/people/v2/field_definitions?per_page=100')
-    results.fieldDefinitions = defs.data.map(d => ({
-      id:   d.id,
-      name: d.attributes.name,
-      type: d.attributes.data_type,
-      tab:  d.attributes.tab_name,
-    }))
-  } catch (e) {
-    results.fieldDefinitionsError = e.message
-  }
-
+  // 1. Probe each configured list ID two ways:
+  //    - the list resource itself  /lists/{id}
+  //    - its people sub-resource    /lists/{id}/people
   const listIds = {
     college:     process.env.PCO_LIST_COLLEGE,
     earlycareer: process.env.PCO_LIST_EARLY_CAREER,
     youngpro:    process.env.PCO_LIST_YOUNG_PRO,
   }
 
-  results.listTests = {}
+  results.probes = {}
   for (const [key, id] of Object.entries(listIds)) {
+    const probe = { listId: id }
     try {
-      const basic = await pcoFetch(`/people/v2/lists/${id}/people?per_page=1`)
-      const withIncludes = await pcoFetch(
-        `/people/v2/lists/${id}/people?per_page=1&include=phone_numbers,field_data`
-      )
-      results.listTests[key] = {
-        listId:       id,
-        total:        basic.meta?.total_count,
-        samplePerson: basic.data[0]?.attributes,
-        includedTypes: [...new Set((withIncludes.included || []).map(i => i.type))],
-        sampleFieldData: (withIncludes.included || [])
-          .filter(i => i.type === 'FieldDatum')
-          .slice(0, 3)
-          .map(i => ({
-            id:    i.id,
-            value: i.attributes.value,
-            defId: i.relationships?.field_definition?.data?.id,
-            personId: i.relationships?.customizable?.data?.id,
-          })),
+      const meta = await pcoFetch(`/people/v2/lists/${id}`)
+      probe.listResource = {
+        ok:   true,
+        name: meta.data?.attributes?.name,
+        total: meta.data?.attributes?.total_people,
+        status: meta.data?.attributes?.status,
       }
     } catch (e) {
-      results.listTests[key] = { listId: id, error: e.message }
+      probe.listResource = { ok: false, error: e.message.slice(0, 200) }
     }
+    try {
+      const ppl = await pcoFetch(`/people/v2/lists/${id}/people?per_page=1`)
+      probe.peopleSubResource = { ok: true, total: ppl.meta?.total_count }
+    } catch (e) {
+      probe.peopleSubResource = { ok: false, error: e.message.slice(0, 200) }
+    }
+    results.probes[key] = probe
+  }
+
+  // 2. Enumerate every list the token can see, so we can find the
+  //    real IDs by name. Match anything that looks YA-related.
+  try {
+    const { data } = await pcoFetchAll('/people/v2/lists?per_page=100')
+    results.totalListsVisible = data.length
+    results.matchingLists = data
+      .filter(l => /college|early|young|ya\b|young adult/i.test(l.attributes?.name || ''))
+      .map(l => ({
+        id:     l.id,
+        name:   l.attributes?.name,
+        total:  l.attributes?.total_people,
+        status: l.attributes?.status,
+      }))
+  } catch (e) {
+    results.listsError = e.message
   }
 
   res.json(results)
