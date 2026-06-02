@@ -56,6 +56,17 @@ export function resolveFieldId(fieldDefs, envVar) {
   return fieldDefs[name] ?? null
 }
 
+// Fetch the valid option labels for a select-type custom field, cached briefly.
+const _fieldOptions = {}
+export async function getFieldOptions(defId) {
+  const cached = _fieldOptions[defId]
+  if (cached && Date.now() - cached.at < 5 * 60_000) return cached.opts
+  const { data } = await pcoFetchAll(`/people/v2/field_definitions/${defId}/field_options?per_page=100`)
+  const opts = data.map(o => o.attributes.value)
+  _fieldOptions[defId] = { opts, at: Date.now() }
+  return opts
+}
+
 export function avatarColor(name) {
   const palette = [
     '#6366f1','#0ea5e9','#ec4899','#f59e0b','#10b981',

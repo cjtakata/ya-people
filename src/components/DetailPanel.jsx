@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import { LIST_META } from './listMeta.js'
 
-const CREW_OPTIONS = ['College Life', 'Early Career', 'Young Professionals']
+const CREW_FALLBACK = ['College Life', 'Early Career', 'Young Professionals']
 
-export default function DetailPanel({ person, onClose, onSave }) {
+export default function DetailPanel({ person, crewOptions = [], onClose, onSave }) {
+  const crewChoices = crewOptions.length ? crewOptions : CREW_FALLBACK
   const [draft, setDraft]     = useState(null)
   const [unsaved, setUnsaved] = useState(false)
   const [saving, setSaving]   = useState(false)
@@ -40,11 +41,31 @@ export default function DetailPanel({ person, onClose, onSave }) {
   }
 
   async function handleSave() {
+    // Diff against the loaded values — only send fields that actually changed,
+    // so we never re-write (or clobber) a field the leader didn't touch.
+    const original = {
+      crew:          person.crew          || '',
+      needsFollowup: person.needsFollowup ?? false,
+      notes:         person.notes         || '',
+    }
+    const changed = {}
+    for (const k of ['crew', 'needsFollowup', 'notes']) {
+      if (draft[k] !== original[k]) changed[k] = draft[k]
+    }
+
+    if (Object.keys(changed).length === 0) {
+      setUnsaved(false)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+      return
+    }
+
     setSaving(true)
     try {
       await onSave(person.id, {
-        fields:       draft,
+        fields:       changed,
         fieldDataIds: person._fieldDataIds || {},
+        personName:   person.name,
       })
       setUnsaved(false)
       setSaved(true)
@@ -137,7 +158,7 @@ export default function DetailPanel({ person, onClose, onSave }) {
                 onChange={e => update('crew', e.target.value)}
               >
                 <option value="">— Not assigned —</option>
-                {CREW_OPTIONS.map(c => (
+                {crewChoices.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>

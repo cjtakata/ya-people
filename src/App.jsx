@@ -26,12 +26,18 @@ function AuthenticatedApp({ user, onLogout }) {
   const [loading, setLoading]         = useState(true)
   const [error, setError]             = useState(null)
   const [selectedId, setSelectedId]   = useState(null)
+  const [crewOptions, setCrewOptions] = useState([])
 
   useEffect(() => {
     fetch('/api/people')
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(data => { setPeople(data); setLoading(false) })
       .catch(() => { setError('Failed to load people from PCO.'); setLoading(false) })
+
+    fetch('/api/meta')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data?.crewOptions) setCrewOptions(data.crewOptions) })
+      .catch(() => {})
   }, [])
 
   const selectedPerson = people.find(p => p.id === selectedId) ?? null
@@ -70,6 +76,7 @@ function AuthenticatedApp({ user, onLogout }) {
         />
         <DetailPanel
           person={selectedPerson}
+          crewOptions={crewOptions}
           onClose={() => setSelectedId(null)}
           onSave={handleSave}
         />
