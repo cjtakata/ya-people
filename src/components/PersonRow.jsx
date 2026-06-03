@@ -7,6 +7,7 @@ export default function PersonRow({ person: p, selected, onClick }) {
 
   const g = (p.gender || '').trim().toLowerCase()
   const genderTag = g === 'male' ? 'M' : g === 'female' ? 'F' : null
+  const hasNote = !!(p.notes && p.notes.trim())
 
   return (
     <div className={`person-row${selected ? ' selected' : ''}`} onClick={onClick}>
@@ -14,7 +15,10 @@ export default function PersonRow({ person: p, selected, onClick }) {
         {p.avatar ? <img src={p.avatar} alt={initials} /> : initials}
       </div>
       <div className="person-info">
-        <div className="person-name">{p.name}</div>
+        <div className="person-name-row">
+          <span className="person-name">{p.name}</span>
+          {hasNote && <span className="note-indicator" title="Has a note">📝</span>}
+        </div>
         <div className="person-chips">
           {p.status && <span className={`badge ${statusClass(p.status)}`}>{p.status}</span>}
           <span className={`badge ${lm.badgeCls}`}>{lm.crew}</span>
