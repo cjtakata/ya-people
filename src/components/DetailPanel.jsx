@@ -93,7 +93,11 @@ export default function DetailPanel({ person, crewOptions = [], statusOptions = 
             </div>
             <div>
               <div className="detail-name">{person.name}</div>
-              <div className="detail-email">{person.email}</div>
+              {person.email
+                ? <a className="detail-email" href={`mailto:${person.email}`} title={`Email ${person.email}`}>
+                    ✉ {person.email}
+                  </a>
+                : <div className="detail-email">No email on file</div>}
             </div>
           </div>
           <button className="close-btn" onClick={onClose}>✕</button>
