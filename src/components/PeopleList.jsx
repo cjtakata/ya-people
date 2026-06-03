@@ -9,13 +9,37 @@ const LIST_OPTIONS = [
   { key: 'youngpro',    label: 'Young Professionals' },
 ]
 
-export default function PeopleList({ people, loading, error, statusOptions = [], selectedId, onSelect }) {
-  const [list, setList]         = useState('all')
+const LABEL = Object.fromEntries(LIST_OPTIONS.map(o => [o.key, o.label]))
+
+export default function PeopleList({
+  people, loading, error, statusOptions = [],
+  myCrews = [], myDiscordId, selectedId, onSelect,
+}) {
+  // Resolve the leader's crew assignment.
+  const oversees   = myCrews.includes('*')
+  const assigned   = oversees ? [] : myCrews.filter(c => c !== '*')
+  const singleCrew = assigned.length === 1 ? assigned[0] : null
+  const unassigned = !oversees && assigned.length === 0
+
+  const [list, setList]         = useState(() => singleCrew || 'all')
   const [gender, setGender]     = useState('all')
   const [followup, setFollowup] = useState('all')
   const [status, setStatus]     = useState('all')
   const [search, setSearch]     = useState('')
   const [sort, setSort]         = useState('name')
+
+  const myCrewStats = useMemo(() => {
+    if (!singleCrew) return null
+    const mine = people.filter(p => p.list === singleCrew)
+    return { total: mine.length, needs: mine.filter(p => p.needsFollowup).length }
+  }, [people, singleCrew])
+
+  function focusMyCrew() {
+    setList(singleCrew); setGender('all'); setFollowup('all'); setStatus('all'); setSearch('')
+  }
+  function focusFollowup() {
+    setList(singleCrew); setFollowup('needs'); setSearch('')
+  }
 
   const counts = useMemo(() => ({
     all:         people.length,
@@ -44,6 +68,29 @@ export default function PeopleList({ people, loading, error, statusOptions = [],
 
   return (
     <div className="people-pane">
+      {singleCrew && myCrewStats && (
+        <div className="mycrew-banner">
+          <div>
+            <span className="mycrew-label">Your crew:</span>
+            <strong>{LABEL[singleCrew]}</strong> · {myCrewStats.total} people
+          </div>
+          <div className="mycrew-actions">
+            <button onClick={focusMyCrew}>View my crew</button>
+            {myCrewStats.needs > 0 && (
+              <button className="mycrew-followup" onClick={focusFollowup}>
+                ⚠ {myCrewStats.needs} need follow-up
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      {unassigned && myDiscordId && (
+        <div className="mycrew-banner mycrew-unassigned">
+          Not assigned to a crew yet — showing everyone. Your Discord ID:{' '}
+          <code>{myDiscordId}</code>
+        </div>
+      )}
+
       <div className="list-toolbar">
         <div className="search-wrap">
           <span className="search-icon">🔍</span>

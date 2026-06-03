@@ -76,6 +76,8 @@ function AuthenticatedApp({ user, onLogout }) {
           loading={loading}
           error={error}
           statusOptions={statusOptions}
+          myCrews={user.crews || []}
+          myDiscordId={user.id}
           selectedId={selectedId}
           onSelect={setSelectedId}
         />

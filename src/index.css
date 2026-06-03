@@ -443,5 +443,26 @@ body {
   .app-subtitle  { display: none; }
 }
 
+/* My Crew banner */
+.mycrew-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 16px; background: var(--primary-light);
+  border-bottom: 1px solid var(--border); font-size: 13px; flex-wrap: wrap;
+}
+.mycrew-label { color: var(--muted); margin-right: 6px; }
+.mycrew-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.mycrew-actions button {
+  border: 1px solid var(--border); background: var(--surface); border-radius: 7px;
+  padding: 5px 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+  font-family: inherit; color: var(--primary); white-space: nowrap;
+}
+.mycrew-actions button:hover { background: var(--bg); }
+.mycrew-followup { color: #b45309 !important; border-color: #fcd34d !important; }
+.mycrew-unassigned { background: var(--bg); color: var(--muted); justify-content: flex-start; }
+.mycrew-unassigned code {
+  background: var(--surface); padding: 1px 6px; border-radius: 4px;
+  border: 1px solid var(--border); color: var(--text); font-size: 12px;
+}
+
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
