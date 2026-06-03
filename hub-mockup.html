@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YA Ecosystem — Mockup</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:            #f8f9fb;
+      --surface:       #ffffff;
+      --border:        #e2e6ea;
+      --text:          #1a1d23;
+      --muted:         #6b7280;
+      --primary:       #4f46e5;
+      --primary-light: #eef2ff;
+      --radius:        10px;
+      --shadow:        0 1px 4px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.05);
+      --shadow-lg:     0 8px 32px rgba(0,0,0,.12);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #e5e7eb; color: var(--text); min-height: 100vh;
+    }
+
+    /* ── Mockup chrome ──────────────────────────────────────────── */
+    .mockup-bar {
+      background: #1a1d23; color: #fff; padding: 12px 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 1000;
+    }
+    .mockup-bar h1 { font-size: 14px; font-weight: 600; opacity: .85; }
+    .mockup-tabs { display: flex; gap: 4px; }
+    .mockup-tab {
+      background: none; border: 1px solid rgba(255,255,255,.2); border-radius: 6px;
+      color: rgba(255,255,255,.65); padding: 5px 14px; font-size: 12px;
+      font-weight: 600; cursor: pointer; font-family: inherit; transition: all .15s;
+    }
+    .mockup-tab:hover  { background: rgba(255,255,255,.08); color: #fff; }
+    .mockup-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    .mockup-section { display: none; }
+    .mockup-section.active { display: block; }
+
+    .mockup-label {
+      text-align: center; padding: 20px 16px 10px;
+      font-size: 12px; color: #6b7280; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+
+    /* ── Shared design tokens ────────────────────────────────────── */
+    .app-header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0 20px; height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 48px; z-index: 100;
+    }
+    .header-left  { display: flex; align-items: center; gap: 10px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .app-logo {
+      width: 32px; height: 32px; border-radius: 8px; overflow: hidden;
+      background: #0a0a0a; display:flex; align-items:center; justify-content:center; padding:4px;
+      flex-shrink: 0;
+    }
+    .app-logo svg { width: 100%; height: 100%; display: block; }
+    .app-title    { font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
+    .app-subtitle { font-size: 11px; color: var(--muted); }
+
+    /* ── App switcher button ─────────────────────────────────────── */
+    .app-switcher-wrap { position: relative; }
+    .app-switcher-btn {
+      width: 34px; height: 34px; border-radius: 8px;
+      background: none; border: 1.5px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all .15s; flex-shrink: 0;
+    }
+    .app-switcher-btn:hover { background: var(--bg); border-color: var(--primary); }
+    .app-switcher-btn.open  { background: var(--primary-light); border-color: var(--primary); }
+    .grid-icon {
+      display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2.5px; width: 14px;
+    }
+    .grid-icon span {
+      width: 3.5px; height: 3.5px; border-radius: 1px; background: var(--muted);
+      display: block;
+    }
+    .app-switcher-btn.open .grid-icon span { background: var(--primary); }
+
+    /* ── App switcher dropdown ───────────────────────────────────── */
+    .app-switcher-dropdown {
+      position: absolute; top: calc(100% + 8px); left: 0; z-index: 300;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: var(--shadow-lg);
+      padding: 16px; width: 232px;
+    }
+    .switcher-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted); margin-bottom: 12px; padding: 0 2px;
+    }
+    .switcher-apps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .switcher-app {
+      display: flex; flex-direction: column; align-items: center; gap: 8px;
+      padding: 14px 10px; border-radius: 10px; cursor: pointer;
+      border: 1.5px solid transparent; transition: all .15s;
+      background: var(--bg); text-align: center; text-decoration: none; color: var(--text);
+    }
+    .switcher-app:hover { background: var(--primary-light); border-color: var(--primary); }
+    .switcher-app.current { border-color: var(--primary); background: var(--primary-light); }
+    .switcher-app-icon {
+      width: 40px; height: 40px; border-radius: 10px; overflow: hidden;
+      background: #0a0a0a; display: flex; align-items: center; justify-content: center; padding: 5px;
+    }
+    .switcher-app-icon svg { width: 100%; height: 100%; }
+    .switcher-app-icon.discord-icon-wrap {
+      background: #5865F2;
+    }
+    .switcher-app-name { font-size: 12px; font-weight: 700; }
+    .switcher-app-desc { font-size: 10px; color: var(--muted); margin-top: 1px; }
+    .switcher-divider { height: 1px; background: var(--border); margin: 12px 0; }
+    .switcher-hub-link {
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 9px; border-radius: 8px; background: var(--bg);
+      font-size: 12px; font-weight: 600; color: var(--muted);
+      border: 1.5px solid transparent; cursor: pointer; transition: all .15s;
+    }
+    .switcher-hub-link:hover { color: var(--primary); border-color: var(--primary); background: var(--primary-light); }
+
+    /* ── User chip (simplified for mockup) ──────────────────────── */
+    .user-chip {
+      display: flex; align-items: center; gap: 7px;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 20px; padding: 4px 12px 4px 4px; cursor: pointer;
+    }
+    .user-avatar {
+      width: 26px; height: 26px; border-radius: 50%; background: #5865F2;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: #fff;
+    }
+    .user-name { font-size: 13px; font-weight: 600; }
+    .logout-btn {
+      background: none; border: 1px solid var(--border); border-radius: 7px;
+      padding: 6px 10px; font-size: 12px; color: var(--muted); cursor: pointer; font-family: inherit;
+    }
+
+    /* ── App frame / content placeholder ────────────────────────── */
+    .app-frame { background: var(--bg); min-height: 380px; }
+    .frame-placeholder {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 380px; color: var(--muted); gap: 8px;
+    }
+    .frame-placeholder .icon { font-size: 32px; opacity: .4; }
+    .frame-placeholder p { font-size: 13px; }
+
+    /* ── Hub page ────────────────────────────────────────────────── */
+    .hub-page {
+      max-width: 480px; margin: 0 auto; padding: 48px 20px 60px;
+    }
+    .hub-logo-wrap {
+      display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 40px;
+    }
+    .hub-logo {
+      width: 72px; height: 72px; border-radius: 18px; overflow: hidden;
+      background: #0a0a0a; padding: 8px;
+    }
+    .hub-logo svg { width: 100%; height: 100%; }
+    .hub-title    { font-size: 28px; font-weight: 800; letter-spacing: -.5px; text-align: center; }
+    .hub-subtitle { font-size: 14px; color: var(--muted); text-align: center; }
+
+    .hub-cards { display: flex; flex-direction: column; gap: 12px; }
+    .hub-card {
+      background: var(--surface); border-radius: 14px; border: 1.5px solid var(--border);
+      padding: 18px 20px; display: flex; align-items: center; gap: 16px;
+      cursor: pointer; transition: all .15s; text-decoration: none; color: var(--text);
+    }
+    .hub-card:hover { border-color: var(--primary); box-shadow: var(--shadow); transform: translateY(-1px); }
+    .hub-card-icon {
+      width: 48px; height: 48px; border-radius: 12px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; padding: 6px;
+    }
+    .hub-card-icon.ya { background: #0a0a0a; }
+    .hub-card-icon.discord { background: #5865F2; }
+    .hub-card-icon svg { width: 100%; height: 100%; }
+    .hub-card-text { flex: 1; min-width: 0; }
+    .hub-card-name { font-size: 16px; font-weight: 700; }
+    .hub-card-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+    .hub-card-arrow { font-size: 18px; color: var(--muted); flex-shrink: 0; }
+    .hub-card:hover .hub-card-arrow { color: var(--primary); }
+
+    .hub-section-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .07em; color: var(--muted); margin: 28px 0 10px 2px;
+    }
+
+    /* ── Mockup wrapper ─────────────────────────────────────────── */
+    .phone-wrap {
+      max-width: 390px; margin: 0 auto;
+      background: var(--surface);
+      border-radius: 0;
+      box-shadow: var(--shadow-lg);
+    }
+    .desktop-wrap {
+      max-width: 860px; margin: 0 auto;
+      background: var(--surface);
+      box-shadow: var(--shadow-lg);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Mockup nav -->
+<div class="mockup-bar">
+  <h1>YA Ecosystem — Mockup</h1>
+  <div class="mockup-tabs">
+    <button class="mockup-tab active" onclick="showTab('switcher-desktop')">App Switcher (desktop)</button>
+    <button class="mockup-tab" onclick="showTab('switcher-mobile')">App Switcher (mobile)</button>
+    <button class="mockup-tab" onclick="showTab('hub')">YA Hub page</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 1 — App switcher, desktop
+══════════════════════════════════════════════ -->
+<div class="mockup-section active" id="switcher-desktop">
+  <div class="mockup-label">App Switcher — desktop header (click the grid icon)</div>
+  <div class="desktop-wrap">
+    <header class="app-header">
+      <div class="header-left">
+
+        <!-- ★ NEW: app switcher -->
+        <div class="app-switcher-wrap">
+          <button class="app-switcher-btn" id="swBtn" onclick="toggleSwitcher()" title="Switch app">
+            <div class="grid-icon">
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+            </div>
+          </button>
+          <div class="app-switcher-dropdown" id="swDropdown" style="display:none">
+            <div class="switcher-label">YA Tools</div>
+            <div class="switcher-apps">
+              <a class="switcher-app current" href="#">
+                <div class="switcher-app-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg></div>
+                <div>
+                  <div class="switcher-app-name">People</div>
+                  <div class="switcher-app-desc">Crew & follow-up</div>
+                </div>
+              </a>
+              <a class="switcher-app" href="https://ya-calendar.vercel.app" target="_blank">
+                <div class="switcher-app-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg></div>
+                <div>
+                  <div class="switcher-app-name">Calendar</div>
+                  <div class="switcher-app-desc">Events & schedule</div>
+                </div>
+              </a>
+              <a class="switcher-app" href="https://discord.com" target="_blank">
+                <div class="switcher-app-icon discord-icon-wrap">
+                  <svg viewBox="0 0 127.14 96.36" fill="white"><path fill-rule="evenodd" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+                </div>
+                <div>
+                  <div class="switcher-app-name">Discord</div>
+                  <div class="switcher-app-desc">Community home</div>
+                </div>
+              </a>
+            </div>
+            <div class="switcher-divider"></div>
+            <button class="switcher-hub-link">
+              ⊞ &nbsp;YA Hub — all tools
+            </button>
+          </div>
+        </div>
+
+        <div class="app-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg>
+        </div>
+        <div>
+          <div class="app-title">YA People</div>
+          <div class="app-subtitle">Planning Center · 223 people</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="user-chip">
+          <div class="user-avatar">CT</div>
+          <span class="user-name">Connor</span>
+        </div>
+        <button class="logout-btn">Sign out</button>
+      </div>
+    </header>
+    <div class="app-frame">
+      <div class="frame-placeholder">
+        <div class="icon">👥</div>
+        <p>YA People app content</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 2 — App switcher, mobile
+══════════════════════════════════════════════ -->
+<div class="mockup-section" id="switcher-mobile">
+  <div class="mockup-label">App Switcher — mobile header (click the grid icon)</div>
+  <div class="phone-wrap">
+    <header class="app-header">
+      <div class="header-left">
+        <div class="app-switcher-wrap">
+          <button class="app-switcher-btn" id="swBtn2" onclick="toggleSwitcher2()" title="Switch app">
+            <div class="grid-icon">
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+              <span></span><span></span><span></span>
+            </div>
+          </button>
+          <div class="app-switcher-dropdown" id="swDropdown2" style="display:none">
+            <div class="switcher-label">YA Tools</div>
+            <div class="switcher-apps">
+              <a class="switcher-app current" href="#">
+                <div class="switcher-app-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg></div>
+                <div><div class="switcher-app-name">People</div><div class="switcher-app-desc">Crew & follow-up</div></div>
+              </a>
+              <a class="switcher-app" href="#">
+                <div class="switcher-app-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg></div>
+                <div><div class="switcher-app-name">Calendar</div><div class="switcher-app-desc">Events & schedule</div></div>
+              </a>
+              <a class="switcher-app" href="#">
+                <div class="switcher-app-icon discord-icon-wrap">
+                  <svg viewBox="0 0 127.14 96.36" fill="white"><path fill-rule="evenodd" d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+                </div>
+                <div><div class="switcher-app-name">Discord</div><div class="switcher-app-desc">Community home</div></div>
+              </a>
+            </div>
+            <div class="switcher-divider"></div>
+            <button class="switcher-hub-link">⊞ &nbsp;YA Hub — all tools</button>
+          </div>
+        </div>
+
+        <div class="app-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg>
+        </div>
+        <div>
+          <div class="app-title">YA People</div>
+          <div class="app-subtitle">Planning Center · 223</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="user-chip">
+          <div class="user-avatar">CT</div>
+        </div>
+      </div>
+    </header>
+    <div class="app-frame">
+      <div class="frame-placeholder">
+        <div class="icon">👥</div>
+        <p>YA People app content</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 3 — YA Hub page
+══════════════════════════════════════════════ -->
+<div class="mockup-section" id="hub">
+  <div class="mockup-label">YA Hub — the "hallway" between tools</div>
+  <div class="phone-wrap">
+    <div class="hub-page">
+      <div class="hub-logo-wrap">
+        <div class="hub-logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg>
+        </div>
+        <div>
+          <div class="hub-title">YA Hub</div>
+          <div class="hub-subtitle">Your leader toolkit</div>
+        </div>
+      </div>
+
+      <div class="hub-section-label">Tools</div>
+      <div class="hub-cards">
+        <a class="hub-card" href="#">
+          <div class="hub-card-icon ya">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg>
+          </div>
+          <div class="hub-card-text">
+            <div class="hub-card-name">YA People</div>
+            <div class="hub-card-desc">Crew directory, follow-ups &amp; notes</div>
+          </div>
+          <div class="hub-card-arrow">›</div>
+        </a>
+        <a class="hub-card" href="#">
+          <div class="hub-card-icon ya">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 750 750"><g fill="#fff"><g transform="translate(231,447)"><path d="M79.9-39.7L110.8-150.8h42L99.8 2c-5.1 14.4-9.8 26.3-14.2 35.7-2.6 5.5-5.5 9.9-8.6 13.2-3.1 3.3-7.3 5.7-12.5 7.3C59.3 59.8 52.3 60.7 43.7 60.7c-3.2 0-9.5-.2-18.9-.6V28.3l9.9.6c7.8 0 13.2-1.7 16.4-4.9 3.2-3.3 5.7-9.2 7.4-17.7L2.8-150.8H47l32.3 111.1h.6z"/></g><g transform="translate(361,447)"><path d="M149.4-6v6h-42.8c-2.3-6.6-3.5-12.6-3.7-17.9-7.2 7.8-14.6 13.4-22.4 16.7-7.7 3.4-16.5 5.1-26.3 5.1-13.8 0-24.9-4-33.3-11.9C12.4-15.9 8.2-26.6 8.2-40c0-12.7 3.4-23.2 10.4-31.6 6.9-8.4 19.2-14.1 37-17.2l28.3-4.2c7.2-1.1 12-2.5 14.3-4.3 2.4-1.7 3.5-4.5 3.5-8.5 0-5.6-2-9.9-6.1-12.9-4.1-2.9-10.7-4.4-20-4.4-14.9 0-23 7-24.3 21H13c1.5-17.2 7.4-30.3 17.4-39.3 10.1-9 26.4-13.5 48.9-13.5 19.3 0 34.3 3.8 45.1 11.3 10.8 7.5 16.2 17.9 16.2 31.2v84.2c0 7 .7 12.1 2.1 15.5 1.4 3.3 3.6 5.5 6.7 6.6zm-47.6-48.7v-18.7c-3.4 2.1-7.1 3.7-11 5-3.9 1.2-9.7 2.4-17.2 3.5-8.5 1.1-14.9 3.4-19.1 6.9-4.3 3.5-6.4 8.6-6.4 15.4 0 5.5 1.7 9.9 5.1 13.2 3.4 3.3 7.8 4.9 13.3 4.9 5.9 0 11.5-1.3 17-3.8 5.5-2.6 9.9-6.1 13.3-10.7 3.4-4.7 5.1-9.9 5-15.7z"/></g></g></svg>
+          </div>
+          <div class="hub-card-text">
+            <div class="hub-card-name">YA Calendar</div>
+            <div class="hub-card-desc">Events, services &amp; schedule</div>
+          </div>
+          <div class="hub-card-arrow">›</div>
+        </a>
+      </div>
+
+      <div class="hub-section-label">Community</div>
+      <div class="hub-cards">
+        <a class="hub-card" href="#">
+          <div class="hub-card-icon discord">
+            <svg viewBox="0 0 24 24" fill="white"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.056a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+          </div>
+          <div class="hub-card-text">
+            <div class="hub-card-name">Discord</div>
+            <div class="hub-card-desc">YA Leaders server — home base</div>
+          </div>
+          <div class="hub-card-arrow">›</div>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  function showTab(id) {
+    document.querySelectorAll('.mockup-section').forEach(s => s.classList.remove('active'))
+    document.querySelectorAll('.mockup-tab').forEach(t => t.classList.remove('active'))
+    document.getElementById(id).classList.add('active')
+    event.target.classList.add('active')
+    // close any open switchers
+    const d1 = document.getElementById('swDropdown')
+    const d2 = document.getElementById('swDropdown2')
+    if (d1) { d1.style.display = 'none'; document.getElementById('swBtn')?.classList.remove('open') }
+    if (d2) { d2.style.display = 'none'; document.getElementById('swBtn2')?.classList.remove('open') }
+  }
+
+  function toggleSwitcher() {
+    const btn = document.getElementById('swBtn')
+    const dd  = document.getElementById('swDropdown')
+    const open = dd.style.display !== 'none'
+    dd.style.display = open ? 'none' : 'block'
+    btn.classList.toggle('open', !open)
+  }
+  function toggleSwitcher2() {
+    const btn = document.getElementById('swBtn2')
+    const dd  = document.getElementById('swDropdown2')
+    const open = dd.style.display !== 'none'
+    dd.style.display = open ? 'none' : 'block'
+    btn.classList.toggle('open', !open)
+  }
+
+  document.addEventListener('click', function(e) {
+    ['swBtn','swDropdown','swBtn2','swDropdown2'].forEach(id => {
+      const el = document.getElementById(id); if (!el) return
+      if (!el.contains(e.target)) {
+        if (id === 'swDropdown')  { el.style.display = 'none'; document.getElementById('swBtn')?.classList.remove('open') }
+        if (id === 'swDropdown2') { el.style.display = 'none'; document.getElementById('swBtn2')?.classList.remove('open') }
+      }
+    })
+  }, true)
+</script>
+</body>
+</html>
