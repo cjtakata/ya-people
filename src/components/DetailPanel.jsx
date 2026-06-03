@@ -4,6 +4,15 @@ import { LIST_META } from './listMeta.js'
 const CREW_FALLBACK   = ['College Life', 'Early Career', 'Young Professionals']
 const STATUS_FALLBACK = ['Active', 'Missing', 'Friend', 'Alumni', 'Moved On']
 
+// Format a US 10-digit number as (xxx)xxx-xxxx; leave anything else as-is.
+function formatPhone(raw) {
+  if (!raw) return raw
+  const d = raw.replace(/\D/g, '')
+  const ten = d.length === 11 && d[0] === '1' ? d.slice(1) : d
+  if (ten.length === 10) return `(${ten.slice(0, 3)})${ten.slice(3, 6)}-${ten.slice(6)}`
+  return raw
+}
+
 export default function DetailPanel({ person, crewOptions = [], statusOptions = [], onClose, onSave }) {
   const crewChoices   = crewOptions.length   ? crewOptions   : CREW_FALLBACK
   const statusChoices = statusOptions.length ? statusOptions : STATUS_FALLBACK
@@ -124,7 +133,7 @@ export default function DetailPanel({ person, crewOptions = [], statusOptions = 
               <div className="info-item-label">Phone</div>
               <div className="info-item-value">
                 {person.phone
-                  ? <a className="info-link" href={`sms:${person.phone.replace(/[^\d+]/g, '')}`}>{person.phone}</a>
+                  ? <a className="info-link" href={`sms:${person.phone.replace(/[^\d+]/g, '')}`}>{formatPhone(person.phone)}</a>
                   : '—'}
               </div>
             </div>
