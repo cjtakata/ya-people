@@ -121,6 +121,10 @@ export default function AppHeader({ user, onLogout, listCount, myCrew, onChooseC
                   </a>
                 ))}
               </div>
+              <div className="sw-divider" />
+              <a className="sw-hub-link" href="https://ya-hub.vercel.app" target="_blank" rel="noreferrer">
+                ⊞ &nbsp;YA Hub — all tools
+              </a>
             </div>
           )}
         </div>
