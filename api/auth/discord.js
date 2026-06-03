@@ -6,7 +6,7 @@ export default function handler(req, res) {
     client_id:     process.env.DISCORD_CLIENT_ID,
     redirect_uri:  `${appUrl}/api/auth/callback`,
     response_type: 'code',
-    scope:         'identify guilds',
+    scope:         'identify guilds guilds.members.read',
     state,
   })
 

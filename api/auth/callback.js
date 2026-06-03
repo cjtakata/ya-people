@@ -1,4 +1,5 @@
 import { createSessionCookie, parseCookies } from '../_lib/auth.js'
+import { resolveCrews } from '../_lib/leaders.js'
 
 export default async function handler(req, res) {
   const { code, state, error } = req.query
@@ -45,6 +46,25 @@ export default async function handler(req, res) {
     const isMember = guilds.some(g => g.id === process.env.DISCORD_GUILD_ID)
     if (!isMember) return res.redirect('/?error=not_member')
 
+    // Fetch this user's roles within the guild to derive their crew(s).
+    let roleIds = []
+    try {
+      const memberRes = await fetch(
+        `https://discord.com/api/users/@me/guilds/${process.env.DISCORD_GUILD_ID}/member`,
+        { headers: { Authorization: `Bearer ${access_token}` } }
+      )
+      if (memberRes.ok) {
+        const member = await memberRes.json()
+        roleIds = Array.isArray(member.roles) ? member.roles : []
+      } else {
+        console.error('Member fetch failed:', memberRes.status, await memberRes.text())
+      }
+    } catch (e) {
+      console.error('Member fetch error:', e.message)
+    }
+
+    const crews = resolveCrews({ roleIds, discordId: discordUser.id })
+
     const avatarUrl = discordUser.avatar
       ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=64`
       : null
@@ -54,6 +74,7 @@ export default async function handler(req, res) {
       username:    discordUser.username,
       global_name: discordUser.global_name || discordUser.username,
       avatar:      avatarUrl,
+      crews,
     })
 
     res.setHeader('Set-Cookie', [

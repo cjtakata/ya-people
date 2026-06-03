@@ -1,28 +1,40 @@
-// Maps a Discord user ID -> their crew assignment, for the "My Crew" view.
+// Crew assignment for the "My Crew" view, driven primarily by DISCORD ROLES.
 //
-// Crew values are LIST KEYS:
-//   'college'     → College Life (18-22)
-//   'earlycareer' → Early Career (23-27)
-//   'youngpro'    → Young Professional (28-30)
-// Use ['*'] for leaders/admins who oversee ALL crews (no default filter).
+// Map each Discord ROLE ID to the crew it represents. Manage crews by assigning
+// these roles in Discord — add a leader to the "Early Career Leader" role and
+// they automatically get that crew in the app the next time they sign in.
 //
-// To find a leader's Discord ID: have them sign in — if they're not yet
-// assigned, the app shows their ID at the top of the people list. Add them
-// here and redeploy.
+// Crew keys: 'college' | 'earlycareer' | 'youngpro'.
+// Use '*' for a leadership/admin role that should see ALL crews.
+//
+// Find a role ID: Discord → Server Settings → Roles → (role) → ⋯ → Copy Role ID
+// (requires Developer Mode: Settings → Advanced → Developer Mode).
 
-export const LEADERS = {
-  // '123456789012345678': { name: 'Connor', crews: ['*'] },
-  // '234567890123456789': { name: 'Jordan', crews: ['earlycareer'] },
-  // '345678901234567890': { name: 'Sam',    crews: ['college'] },
+export const ROLE_CREWS = {
+  // '1503600000000000000': 'college',       // College Life Leader
+  // '1503600000000000001': 'earlycareer',   // Early Career Leader
+  // '1503600000000000002': 'youngpro',      // Young Pro Leader
+  // '1503600000000000003': '*',             // YA Leadership / admin → all crews
+}
+
+// Optional manual override by Discord USER ID, for anyone who should have a
+// crew without a matching role (merged with whatever their roles give them).
+export const LEADER_OVERRIDES = {
+  // '123456789012345678': ['*'],
 }
 
 const VALID_CREWS = new Set(['college', 'earlycareer', 'youngpro'])
 
-// Returns the leader's crews as a list of valid keys, ['*'] for all-crew
-// overseers, or [] if they aren't assigned to any crew.
-export function getLeaderCrews(discordId) {
-  const entry = LEADERS[discordId]
-  if (!entry) return []
-  if (entry.crews?.includes('*')) return ['*']
-  return (entry.crews || []).filter(c => VALID_CREWS.has(c))
+// Given a user's guild role IDs (+ their Discord user id), resolve their crews:
+// ['*'] for all-crew overseers, a list of crew keys, or [] if unassigned.
+export function resolveCrews({ roleIds = [], discordId } = {}) {
+  const crews = new Set()
+  for (const roleId of roleIds) {
+    const crew = ROLE_CREWS[roleId]
+    if (crew) crews.add(crew)
+  }
+  for (const crew of (LEADER_OVERRIDES[discordId] || [])) crews.add(crew)
+
+  if (crews.has('*')) return ['*']
+  return [...crews].filter(c => VALID_CREWS.has(c))
 }
