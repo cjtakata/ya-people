@@ -115,19 +115,18 @@ export default function DetailPanel({ person, crewOptions = [], statusOptions = 
         {/* PCO read-only info */}
         <div>
           <div className="field-section-title">From Planning Center</div>
-          <div className="info-since">Member since {person.since || '—'}</div>
           <div className="info-grid">
             <div className="info-item">
               <div className="info-item-label">Phone</div>
               <div className="info-item-value">{person.phone || '—'}</div>
             </div>
             <div className="info-item">
-              <div className="info-item-label">Email</div>
-              <div className="info-item-value info-item-email">{person.email || '—'}</div>
-            </div>
-            <div className="info-item">
               <div className="info-item-label">Age</div>
               <div className="info-item-value">{person.age ?? '—'}</div>
+            </div>
+            <div className="info-item">
+              <div className="info-item-label">Member since</div>
+              <div className="info-item-value">{person.since || '—'}</div>
             </div>
             <div className="info-item">
               <div className="info-item-label">Gender</div>
