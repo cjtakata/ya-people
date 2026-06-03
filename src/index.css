@@ -135,11 +135,14 @@ body {
 .app-title    { font-size: 17px; font-weight: 700; letter-spacing: -.3px; }
 .app-subtitle { font-size: 11px; color: var(--muted); }
 
+.user-menu { position: relative; }
 .user-chip {
   display: flex; align-items: center; gap: 7px;
   background: var(--bg); border: 1px solid var(--border);
-  border-radius: 20px; padding: 4px 12px 4px 4px;
+  border-radius: 20px; padding: 4px 10px 4px 4px;
+  cursor: pointer; font-family: inherit; color: var(--text);
 }
+.user-chip:hover { border-color: var(--primary); }
 .user-avatar {
   width: 26px; height: 26px; border-radius: 50%;
   background: #5865F2;
@@ -148,7 +151,33 @@ body {
   overflow: hidden; flex-shrink: 0;
 }
 .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.user-chip-text { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.15; }
 .user-name { font-size: 13px; font-weight: 600; }
+.user-crew { font-size: 11px; color: var(--primary); font-weight: 600; }
+.user-chip-caret { font-size: 10px; color: var(--muted); margin-left: 1px; }
+
+.user-dropdown {
+  position: absolute; top: calc(100% + 6px); right: 0; z-index: 300;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; box-shadow: var(--shadow-lg);
+  padding: 6px; min-width: 190px;
+}
+.user-dropdown-label {
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .06em; color: var(--muted); padding: 6px 10px 4px;
+}
+.user-dropdown-item {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+  background: none; border: none; border-radius: 7px;
+  padding: 8px 10px; font-size: 13px; font-family: inherit; color: var(--text);
+  cursor: pointer; text-align: left;
+}
+.user-dropdown-item:hover { background: var(--bg); }
+.user-dropdown-item.selected { color: var(--primary); font-weight: 600; }
+.user-dropdown-item .check { width: 12px; color: var(--primary); font-size: 12px; }
+.user-dropdown-divider { height: 1px; background: var(--border); margin: 6px 4px; }
+.user-dropdown-item.signout { color: var(--muted); }
+.user-dropdown-item.signout:hover { color: var(--danger); }
 
 .logout-btn {
   background: none; border: 1px solid var(--border); border-radius: 7px;

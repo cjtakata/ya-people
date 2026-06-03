@@ -29,6 +29,20 @@ function AuthenticatedApp({ user, onLogout }) {
   const [crewOptions, setCrewOptions]     = useState([])
   const [statusOptions, setStatusOptions] = useState([])
 
+  // "My crew" preference: a manual pick (saved per-device) wins; otherwise fall
+  // back to the crew implied by the user's Discord role; otherwise All crews.
+  const [myCrew, setMyCrew] = useState(() => {
+    const saved = localStorage.getItem('ya_my_crew')
+    if (saved) return saved
+    const roleCrew = (user.crews || []).filter(c => c !== '*')
+    return roleCrew.length === 1 ? roleCrew[0] : 'all'
+  })
+
+  function chooseCrew(key) {
+    setMyCrew(key)
+    localStorage.setItem('ya_my_crew', key)
+  }
+
   useEffect(() => {
     fetch('/api/people')
       .then(r => r.ok ? r.json() : Promise.reject())
@@ -69,15 +83,20 @@ function AuthenticatedApp({ user, onLogout }) {
 
   return (
     <div className="app-screen">
-      <AppHeader user={user} onLogout={handleLogout} listCount={people.length} />
+      <AppHeader
+        user={user}
+        onLogout={handleLogout}
+        listCount={people.length}
+        myCrew={myCrew}
+        onChooseCrew={chooseCrew}
+      />
       <div className="app-body">
         <PeopleList
           people={people}
           loading={loading}
           error={error}
           statusOptions={statusOptions}
-          myCrews={user.crews || []}
-          myDiscordId={user.id}
+          myCrew={myCrew}
           selectedId={selectedId}
           onSelect={setSelectedId}
         />

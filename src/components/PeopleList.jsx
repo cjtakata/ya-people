@@ -1,44 +1,36 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import PersonRow from './PersonRow.jsx'
-import { LIST_META } from './listMeta.js'
+import { CREW_OPTIONS, CREW_LABEL } from './listMeta.js'
 
-const LIST_OPTIONS = [
-  { key: 'all',         label: 'All crews' },
-  { key: 'college',     label: 'College Life' },
-  { key: 'earlycareer', label: 'Early Career' },
-  { key: 'youngpro',    label: 'Young Professionals' },
-]
-
-const LABEL = Object.fromEntries(LIST_OPTIONS.map(o => [o.key, o.label]))
+const LIST_OPTIONS = CREW_OPTIONS
 
 export default function PeopleList({
   people, loading, error, statusOptions = [],
-  myCrews = [], myDiscordId, selectedId, onSelect,
+  myCrew = 'all', selectedId, onSelect,
 }) {
-  // Resolve the leader's crew assignment.
-  const oversees   = myCrews.includes('*')
-  const assigned   = oversees ? [] : myCrews.filter(c => c !== '*')
-  const singleCrew = assigned.length === 1 ? assigned[0] : null
-  const unassigned = !oversees && assigned.length === 0
+  const hasCrew = myCrew && myCrew !== 'all'
 
-  const [list, setList]         = useState(() => singleCrew || 'all')
+  const [list, setList]         = useState(() => myCrew || 'all')
   const [gender, setGender]     = useState('all')
   const [followup, setFollowup] = useState('all')
   const [status, setStatus]     = useState('all')
   const [search, setSearch]     = useState('')
   const [sort, setSort]         = useState('name')
 
+  // When the leader changes their crew in the profile bar, focus the list on it.
+  useEffect(() => { setList(myCrew || 'all') }, [myCrew])
+
   const myCrewStats = useMemo(() => {
-    if (!singleCrew) return null
-    const mine = people.filter(p => p.list === singleCrew)
+    if (!hasCrew) return null
+    const mine = people.filter(p => p.list === myCrew)
     return { total: mine.length, needs: mine.filter(p => p.needsFollowup).length }
-  }, [people, singleCrew])
+  }, [people, myCrew, hasCrew])
 
   function focusMyCrew() {
-    setList(singleCrew); setGender('all'); setFollowup('all'); setStatus('all'); setSearch('')
+    setList(myCrew); setGender('all'); setFollowup('all'); setStatus('all'); setSearch('')
   }
   function focusFollowup() {
-    setList(singleCrew); setFollowup('needs'); setSearch('')
+    setList(myCrew); setFollowup('needs'); setSearch('')
   }
 
   const counts = useMemo(() => ({
@@ -68,11 +60,11 @@ export default function PeopleList({
 
   return (
     <div className="people-pane">
-      {singleCrew && myCrewStats && (
+      {hasCrew && myCrewStats && (
         <div className="mycrew-banner">
           <div>
             <span className="mycrew-label">Your crew:</span>
-            <strong>{LABEL[singleCrew]}</strong> · {myCrewStats.total} people
+            <strong>{CREW_LABEL[myCrew]}</strong> · {myCrewStats.total} people
           </div>
           <div className="mycrew-actions">
             <button onClick={focusMyCrew}>View my crew</button>
@@ -82,12 +74,6 @@ export default function PeopleList({
               </button>
             )}
           </div>
-        </div>
-      )}
-      {unassigned && myDiscordId && (
-        <div className="mycrew-banner mycrew-unassigned">
-          Not assigned to a crew yet — showing everyone. Your Discord ID:{' '}
-          <code>{myDiscordId}</code>
         </div>
       )}
 
