@@ -11,10 +11,10 @@
 // (requires Developer Mode: Settings → Advanced → Developer Mode).
 
 export const ROLE_CREWS = {
-  // '1503600000000000000': 'college',       // College Life Leader
-  // '1503600000000000001': 'earlycareer',   // Early Career Leader
-  // '1503600000000000002': 'youngpro',      // Young Pro Leader
-  // '1503600000000000003': '*',             // YA Leadership / admin → all crews
+  '1509450239092719738': 'college',       // College Life Leader
+  '1509450549706362991': 'earlycareer',   // Early Career Leader
+  '1509450582488780820': 'youngpro',      // Young Professionals Leader
+  // '<role id>': '*',                     // (optional) YA Leadership / admin → all crews
 }
 
 // Optional manual override by Discord USER ID, for anyone who should have a
