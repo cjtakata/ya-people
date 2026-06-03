@@ -95,7 +95,7 @@ export default function DetailPanel({ person, crewOptions = [], statusOptions = 
               <div className="detail-name">{person.name}</div>
               {person.email
                 ? <a className="detail-email" href={`mailto:${person.email}`} title={`Email ${person.email}`}>
-                    ✉ {person.email}
+                    {person.email}
                   </a>
                 : <div className="detail-email">No email on file</div>}
             </div>
@@ -122,7 +122,11 @@ export default function DetailPanel({ person, crewOptions = [], statusOptions = 
           <div className="info-grid">
             <div className="info-item">
               <div className="info-item-label">Phone</div>
-              <div className="info-item-value">{person.phone || '—'}</div>
+              <div className="info-item-value">
+                {person.phone
+                  ? <a className="info-link" href={`sms:${person.phone.replace(/[^\d+]/g, '')}`}>{person.phone}</a>
+                  : '—'}
+              </div>
             </div>
             <div className="info-item">
               <div className="info-item-label">Age</div>

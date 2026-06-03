@@ -427,6 +427,8 @@ a.detail-email:hover { color: var(--primary); text-decoration: underline; }
   text-transform: uppercase; letter-spacing: .05em;
 }
 .info-item-value { font-size: 14px; font-weight: 600; margin-top: 3px; }
+.info-link { color: var(--primary); text-decoration: none; }
+.info-link:hover { text-decoration: underline; }
 
 .unsaved-dot {
   width: 7px; height: 7px; border-radius: 50%; background: var(--warning);
