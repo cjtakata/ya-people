@@ -51,6 +51,16 @@ function extractPhone(personId, included) {
   return primary?.attributes?.number || null
 }
 
+// Email isn't a Person attribute in PCO — it's a related Email resource,
+// fetched via include=emails (same pattern as phone numbers).
+function extractEmail(personId, included) {
+  const emails = included.filter(
+    i => i.type === 'Email' && i.relationships?.person?.data?.id === personId
+  )
+  const primary = emails.find(e => e.attributes.primary) || emails[0]
+  return primary?.attributes?.address || ''
+}
+
 function normalizePerson(raw, included, list, fieldDefs) {
   const a  = raw.attributes
   const id = raw.id
@@ -64,7 +74,7 @@ function normalizePerson(raw, included, list, fieldDefs) {
   return {
     id,
     name,
-    email:          a.primary_email_address || '',
+    email:          extractEmail(id, included),
     phone:          extractPhone(id, included),
     age:            calcAge(a.birthdate),
     gender:         a.gender || null,
@@ -91,7 +101,7 @@ export default async function handler(req, res) {
     const settled = await Promise.allSettled(
       LISTS.map(list =>
         pcoFetchAll(
-          `/people/v2/lists/${list.id()}/people?include=phone_numbers,field_data&per_page=100`
+          `/people/v2/lists/${list.id()}/people?include=phone_numbers,emails,field_data&per_page=100`
         ).then(({ data, included }) => ({ list, data, included }))
       )
     )
