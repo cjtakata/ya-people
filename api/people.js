@@ -1,11 +1,17 @@
 import { requireAuth } from './_lib/auth.js'
-import { pcoFetchAll, getFieldDefinitions, avatarColor, calcAge, fmtSince } from './_lib/pco.js'
+import { pcoFetch, pcoFetchAll, getFieldDefinitions, avatarColor, calcAge, fmtSince } from './_lib/pco.js'
 
-const LISTS = [
-  { id: () => process.env.PCO_LIST_COLLEGE,      key: 'college',     name: 'College Life' },
-  { id: () => process.env.PCO_LIST_EARLY_CAREER,  key: 'earlycareer', name: 'Early Career' },
-  { id: () => process.env.PCO_LIST_YOUNG_PRO,     key: 'youngpro',    name: 'Young Pro' },
-]
+// YA Status values that belong in the app
+const ACTIVE_STATUSES = new Set(['Active', 'Missing', 'TBD'])
+
+// Infer which crew group a person belongs to based on age.
+// Used as a default when no Crew custom field is set.
+function inferListFromAge(age) {
+  if (age == null) return 'earlycareer'
+  if (age <= 22)   return 'college'
+  if (age <= 26)   return 'earlycareer'
+  return 'youngpro'
+}
 
 function extractFieldValues(personId, included, fieldDefs) {
   const crewDefId        = fieldDefs[process.env.PCO_FIELD_CREW]
@@ -51,8 +57,6 @@ function extractPhone(personId, included) {
   return primary?.attributes?.number || null
 }
 
-// Email isn't a Person attribute in PCO — it's a related Email resource,
-// fetched via include=emails (same pattern as phone numbers).
 function extractEmail(personId, included) {
   const emails = included.filter(
     i => i.type === 'Email' && i.relationships?.person?.data?.id === personId
@@ -61,7 +65,14 @@ function extractEmail(personId, included) {
   return primary?.attributes?.address || ''
 }
 
-function normalizePerson(raw, included, list, fieldDefs) {
+// Map a Crew custom field value to the list key used in the frontend
+const CREW_VALUE_TO_LIST = {
+  'College Life':        'college',
+  'Early Career':        'earlycareer',
+  'Young Professionals': 'youngpro',
+}
+
+function normalizePerson(raw, included, fieldDefs) {
   const a  = raw.attributes
   const id = raw.id
 
@@ -70,25 +81,50 @@ function normalizePerson(raw, included, list, fieldDefs) {
   const firstName = a.first_name || ''
   const lastName  = a.last_name  || ''
   const name      = [firstName, lastName].filter(Boolean).join(' ') || 'Unknown'
+  const age       = calcAge(a.birthdate)
+
+  // Determine list/group: prefer Crew field value, fall back to age inference
+  const listFromCrew = CREW_VALUE_TO_LIST[values.crew]
+  const list         = listFromCrew || inferListFromAge(age)
+  const listNames    = { college: 'College Life', earlycareer: 'Early Career', youngpro: 'Young Professionals' }
 
   return {
     id,
     name,
     email:          extractEmail(id, included),
     phone:          extractPhone(id, included),
-    age:            calcAge(a.birthdate),
+    age,
     gender:         a.gender || null,
     since:          fmtSince(a.created_at),
     avatar:         a.avatar || null,
     color:          avatarColor(name),
-    list:           list.key,
-    listName:       list.name,
+    list,
+    listName:       listNames[list],
     crew:           values.crew         || '',
     needsFollowup:  values.needsFollowup ?? false,
     notes:          values.notes        || '',
     status:         values.status       || '',
     _fieldDataIds:  dataIds,
   }
+}
+
+// Fetch people in batches by IDs using PCO's filter[id] param
+async function fetchPeopleByIds(ids) {
+  const BATCH = 50
+  const allData     = []
+  const allIncluded = []
+
+  for (let i = 0; i < ids.length; i += BATCH) {
+    const batch  = ids.slice(i, i + BATCH)
+    const idList = batch.join(',')
+    const { data, included } = await pcoFetchAll(
+      `/people/v2/people?filter[id]=${idList}&include=phone_numbers,emails,field_data&per_page=100`
+    )
+    allData.push(...data)
+    allIncluded.push(...included)
+  }
+
+  return { data: allData, included: allIncluded }
 }
 
 export default async function handler(req, res) {
@@ -98,34 +134,31 @@ export default async function handler(req, res) {
   try {
     const fieldDefs = await getFieldDefinitions()
 
-    const settled = await Promise.allSettled(
-      LISTS.map(list =>
-        pcoFetchAll(
-          `/people/v2/lists/${list.id()}/people?include=phone_numbers,emails,field_data&per_page=100`
-        ).then(({ data, included }) => ({ list, data, included }))
-      )
+    // 1. Fetch all field_data records for the YA Status field
+    const statusDefId = fieldDefs[process.env.PCO_FIELD_STATUS]
+    if (!statusDefId) throw new Error('YA Status field definition not found')
+
+    const { data: statusRecords } = await pcoFetchAll(
+      `/people/v2/field_data?where%5Bfield_definition_id%5D=${statusDefId}&per_page=100`
     )
 
-    const listResults = settled
-      .filter(r => {
-        if (r.status === 'rejected') {
-          console.error('List fetch failed:', r.reason?.message)
-          return false
-        }
-        return true
-      })
-      .map(r => r.value)
+    // 2. Filter to active statuses and collect person IDs
+    const personIds = statusRecords
+      .filter(r => ACTIVE_STATUSES.has(r.attributes.value))
+      .map(r => r.relationships.customizable.data.id)
 
-    const seen   = new Set()
-    const people = []
-
-    for (const { list, data, included } of listResults) {
-      for (const raw of data) {
-        if (seen.has(raw.id)) continue
-        seen.add(raw.id)
-        people.push(normalizePerson(raw, included, list, fieldDefs))
-      }
+    if (personIds.length === 0) {
+      return res.json([])
     }
+
+    // 3. Fetch full profiles for those people
+    const { data, included } = await fetchPeopleByIds(personIds)
+
+    // 4. Normalize
+    const people = data.map(raw => normalizePerson(raw, included, fieldDefs))
+
+    // Sort by name
+    people.sort((a, b) => a.name.localeCompare(b.name))
 
     res.json(people)
   } catch (err) {
