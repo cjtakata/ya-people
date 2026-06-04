@@ -21,11 +21,16 @@ export default function App() {
   return <AuthenticatedApp user={user} onLogout={() => setUser(null)} />
 }
 
+function parseHashId() {
+  const m = window.location.hash.match(/^#\/person\/(.+)$/)
+  return m ? m[1] : null
+}
+
 function AuthenticatedApp({ user, onLogout }) {
   const [people, setPeople]           = useState([])
   const [loading, setLoading]         = useState(true)
   const [error, setError]             = useState(null)
-  const [selectedId, setSelectedId]   = useState(null)
+  const [selectedId, setSelectedId]   = useState(parseHashId)
   const [crewOptions, setCrewOptions]     = useState([])
   const [statusOptions, setStatusOptions] = useState([])
 
@@ -56,6 +61,21 @@ function AuthenticatedApp({ user, onLogout }) {
         if (data?.statusOptions) setStatusOptions(data.statusOptions)
       })
       .catch(() => {})
+  }, [])
+
+  // Keep the URL hash in sync with the selected person
+  useEffect(() => {
+    const newHash = selectedId ? `#/person/${selectedId}` : ''
+    if (window.location.hash !== newHash) {
+      history.pushState(null, '', newHash || window.location.pathname)
+    }
+  }, [selectedId])
+
+  // Handle browser back/forward
+  useEffect(() => {
+    function onPop() { setSelectedId(parseHashId()) }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
   }, [])
 
   const selectedPerson = people.find(p => p.id === selectedId) ?? null

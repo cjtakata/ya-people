@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { LIST_META } from './listMeta.js'
 
 const CREW_FALLBACK   = ['College Life', 'Early Career', 'Young Professionals']
@@ -16,10 +16,18 @@ function formatPhone(raw) {
 export default function DetailPanel({ person, crewOptions = [], statusOptions = [], onClose, onSave }) {
   const crewChoices   = crewOptions.length   ? crewOptions   : CREW_FALLBACK
   const statusChoices = statusOptions.length ? statusOptions : STATUS_FALLBACK
-  const [draft, setDraft]     = useState(null)
-  const [unsaved, setUnsaved] = useState(false)
-  const [saving, setSaving]   = useState(false)
-  const [saved, setSaved]     = useState(false)
+  const [draft, setDraft]       = useState(null)
+  const [unsaved, setUnsaved]   = useState(false)
+  const [saving, setSaving]     = useState(false)
+  const [saved, setSaved]       = useState(false)
+  const [copied, setCopied]     = useState(false)
+
+  const handleCopyLink = useCallback(() => {
+    navigator.clipboard.writeText(window.location.href).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }, [])
 
   useEffect(() => {
     if (!person) return
@@ -109,7 +117,12 @@ export default function DetailPanel({ person, crewOptions = [], statusOptions = 
                 : <div className="detail-email">No email on file</div>}
             </div>
           </div>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className={`copy-link-btn${copied ? ' copied' : ''}`} onClick={handleCopyLink} title="Copy link to this profile">
+              {copied ? '✓ Copied' : '🔗 Copy Link'}
+            </button>
+            <button className="close-btn" onClick={onClose}>✕</button>
+          </div>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <a
